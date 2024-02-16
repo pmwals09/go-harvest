@@ -219,7 +219,7 @@ Documentation:
 - [ ] GET /v2/users/{USER_ID}/cost_rates/{COST_RATE_ID}
 - [ ] POST /v2/users/{USER_ID}/cost_rates
 - [ ] GET /v2/users/{USER_ID}/project_assignments
-- [ ] GET /v2/users/me/project_assignments
+- [x] GET /v2/users/me/project_assignments
 - [ ] GET /v2/users
 - [x] GET /v2/users/me
 - [ ] GET /v2/users/{USER_ID}

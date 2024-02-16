@@ -20,7 +20,20 @@ func main() {
   client := goharvest.NewClient(PAT, accountID, "pmwals09@gmail.com")
   user, err := client.GetMe()
   if err != nil {
-    fmt.Fprintf(os.Stderr, "A problem occurred getting the current user: %w", err)
+    fmt.Fprintf(os.Stderr, "Problem getting current user: %s", err.Error())
   }
-  fmt.Printf("%+v\n", user)
+  fmt.Printf("%+v\n\n", user)
+  res, err := client.GetMyProjectAssignments()
+  if err != nil {
+    fmt.Fprintf(os.Stderr, "Problem getting current user project assignments: %s", err.Error())
+  }
+  for _, pa := range res.ProjectAssignments {
+    code, name, clientName := pa.Project.Code, pa.Project.Name, pa.Client.Name
+    fmt.Println(code, "-", clientName, "-", name)
+    for _, task := range pa.TaskAssignments {
+      fmt.Println(task.Task.Name)
+    }
+    fmt.Println()
+  }
+  fmt.Println()
 }
