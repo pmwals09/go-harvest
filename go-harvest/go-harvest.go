@@ -54,6 +54,19 @@ func (c *Client) GetMe() (User, error) {
 	return u, nil
 }
 
+func (c *Client) GetTimeEntries() (TimeEntryResponse, error) {
+  tr := TimeEntryResponse{}
+  res, err := c.Get("/v2/time_entries")
+  if err != nil {
+    return tr, err
+  }
+  err = json.NewDecoder(res.Body).Decode(&tr)
+  if err != nil {
+    return tr, err
+  }
+  return tr, nil
+}
+
 func (c *Client) Get(urlTail string) (*http.Response, error) {
   return c.makeRequest("GET", urlTail, nil)
 }

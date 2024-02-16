@@ -40,4 +40,14 @@ func main() {
     fmt.Println()
   }
   fmt.Println()
+
+  fmt.Println("TIME ENTRIES")
+  timeEntriesResponse, err := client.GetTimeEntries()
+  if err != nil {
+    fmt.Fprintf(os.Stderr, "Problem getting time entries: %s", err.Error())
+  } else {
+    for _, te := range timeEntriesResponse.TimeEntries {
+      fmt.Printf("%+v\n", te)
+    }
+  }
 }
