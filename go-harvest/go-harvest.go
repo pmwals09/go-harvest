@@ -1,11 +1,11 @@
 package goharvest
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 )
 
 type Client struct {
@@ -13,27 +13,23 @@ type Client struct {
 	Token     string
 	Client    http.Client
 	AccountID string
-	Email     string
+	UserAgent string
 }
 
-func NewClient(PAT string, accountID string, email string) *Client {
+func NewClient(PAT string, accountID string, userAgent string) *Client {
 	return &Client{
 		Token:     PAT,
 		Client:    http.Client{},
 		BasePath:  "https://api.harvestapp.com",
 		AccountID: accountID,
-		Email:     email,
+		UserAgent: userAgent,
 	}
 }
 
 func (c *Client) GetMyProjectAssignments() (ProjectAssignmentResponse, error) {
 	pa := ProjectAssignmentResponse{}
 	urlTail := "/v2/users/me/project_assignments"
-	req, err := c.newRequest("GET", urlTail, nil)
-	if err != nil {
-		return pa, err
-	}
-	res, err := c.Client.Do(req)
+	res, err := c.Get(urlTail)
 	if err != nil {
 		return pa, err
 	}
@@ -47,11 +43,7 @@ func (c *Client) GetMyProjectAssignments() (ProjectAssignmentResponse, error) {
 func (c *Client) GetMe() (User, error) {
 	u := User{}
 	urlTail := "/v2/users/me"
-	req, err := c.newRequest("GET", urlTail, nil)
-	if err != nil {
-		return u, err
-	}
-	res, err := c.Client.Do(req)
+	res, err := c.Get(urlTail)
 	if err != nil {
 		return u, err
 	}
@@ -62,8 +54,8 @@ func (c *Client) GetMe() (User, error) {
 	return u, nil
 }
 
-func printError(msgs ...string) {
-	fmt.Fprint(os.Stderr, msgs)
+func (c *Client) Get(urlTail string) (*http.Response, error) {
+  return c.makeRequest("GET", urlTail, nil)
 }
 
 func (c *Client) newRequest(method string, urlTail string, body io.Reader) (*http.Request, error) {
@@ -77,7 +69,40 @@ func (c *Client) newRequest(method string, urlTail string, body io.Reader) (*htt
 	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Token))
 	req.Header.Set("Harvest-Account-Id", c.AccountID)
-	req.Header.Set("User-Agent", "GoClient ("+c.Email+")")
+	req.Header.Set("User-Agent", c.UserAgent)
 
 	return req, err
 }
+
+type ErrorCodeResponse struct {
+  StatusCode int
+  Message string
+}
+func (e ErrorCodeResponse) Error() string {
+  return fmt.Sprintf("Error: %d, %s", e.StatusCode, e.Message)
+}
+func (c *Client) makeRequest(method string, urlTail string, body io.Reader) (*http.Response, error) {
+  req, err := c.newRequest(method, urlTail, body)
+  if err != nil {
+    return &http.Response{}, err
+  }
+
+  res, err := c.Client.Do(req)
+  if err != nil {
+    return res, err
+  }
+
+  // Handle non-200 results
+  if res.StatusCode < 200 || res.StatusCode >= 300 {
+    // io.ReadAll() will consume the response body, so we need to re-set it
+    ba, err := io.ReadAll(res.Body)
+    res.Body = io.NopCloser(bytes.NewBuffer(ba))
+    if err != nil {
+      return res, err
+    }
+    return res, ErrorCodeResponse{res.StatusCode, string(ba)}
+  }
+
+  return res, nil
+}
+

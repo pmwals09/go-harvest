@@ -18,16 +18,20 @@ func main() {
   accountID := os.Getenv("HARVEST_ACCOUNT_ID")
 
   client := goharvest.NewClient(PAT, accountID, "pmwals09@gmail.com")
+
+  fmt.Println("CURRENT USER")
   user, err := client.GetMe()
   if err != nil {
     fmt.Fprintf(os.Stderr, "Problem getting current user: %s", err.Error())
   }
   fmt.Printf("%+v\n\n", user)
-  res, err := client.GetMyProjectAssignments()
+
+  fmt.Println("PROJECT ASSIGNMENTS")
+  projectAssignmentsResponse, err := client.GetMyProjectAssignments()
   if err != nil {
     fmt.Fprintf(os.Stderr, "Problem getting current user project assignments: %s", err.Error())
   }
-  for _, pa := range res.ProjectAssignments {
+  for _, pa := range projectAssignmentsResponse.ProjectAssignments {
     code, name, clientName := pa.Project.Code, pa.Project.Name, pa.Client.Name
     fmt.Println(code, "-", clientName, "-", name)
     for _, task := range pa.TaskAssignments {

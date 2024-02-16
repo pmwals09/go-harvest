@@ -210,23 +210,23 @@ Documentation:
 - [User Project Assignments](https://help.getharvest.com/api-v2/users-api/users/project-assignments/)
 - [Users](https://help.getharvest.com/api-v2/users-api/users/users/)
 
-- [ ] GET /v2/users/{USER_ID}/teammates
-- [ ] PATCH /v2/users/{USER_ID}/teammates
-- [ ] GET /v2/users/{USER_ID}/billable_rates
-- [ ] GET /v2/users/{USER_ID}/billable_rates/{billable_RATE_ID}
-- [ ] POST /v2/users/{USER_ID}/billable_rates
-- [ ] GET /v2/users/{USER_ID}/cost_rates
-- [ ] GET /v2/users/{USER_ID}/cost_rates/{COST_RATE_ID}
-- [ ] POST /v2/users/{USER_ID}/cost_rates
-- [ ] GET /v2/users/{USER_ID}/project_assignments
+- [-] GET /v2/users/{USER_ID}/teammates (Must be an Administrator)
+- [ ] PATCH /v2/users/{USER_ID}/teammates (Must be an Administrator)
+- [-] GET /v2/users/{USER_ID}/billable_rates (Must be an Administrator or Manager with permission to edit billable rates)
+- [-] GET /v2/users/{USER_ID}/billable_rates/{billable_RATE_ID} (Must be an Administrator or Manager with permission to edit billable rates)
+- [-] POST /v2/users/{USER_ID}/billable_rates (Must be an Administrator or Manager with permission to edit billable rates)
+- [-] GET /v2/users/{USER_ID}/cost_rates (Must be an Administrator)
+- [-] GET /v2/users/{USER_ID}/cost_rates/{COST_RATE_ID} (Must be an Administrator)
+- [-] POST /v2/users/{USER_ID}/cost_rates (Must be an Administrator)
+- [-] GET /v2/users/{USER_ID}/project_assignments (Must be an Administrator or Manager with assigned teammates)
 - [x] GET /v2/users/me/project_assignments
-- [ ] GET /v2/users
+- [-] GET /v2/users (Must be an Administrator or Manager with assigned teammates)
 - [x] GET /v2/users/me
-- [ ] GET /v2/users/{USER_ID}
-- [ ] POST /v2/users
-- [ ] PATCH /v2/users/{USER_ID}
-- [ ] PATCH /v2/users/{USER_ID}
-- [ ] DELETE /v2/users/{USER_ID}
+- [-] GET /v2/users/{USER_ID} (Must be an Administrator or Manager with assigned teammates)
+- [-] POST /v2/users (Must be an Administrator or Manager with assigned teammates)
+- [-] PATCH /v2/users/{USER_ID} (Must be an Administrator or Manager with assigned teammates)
+- [-] PATCH /v2/users/{USER_ID} (Must be an Administrator or Manager with assigned teammates)
+- [-] DELETE /v2/users/{USER_ID} (Must be an Administrator or Manager with assigned teammates)
 
 ### Reports API
 
