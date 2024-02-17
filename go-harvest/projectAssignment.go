@@ -29,5 +29,5 @@ type ProjectAssignment struct {
 
 type ProjectAssignmentResponse struct {
 	ProjectAssignments []ProjectAssignment `json:"project_assignments"`
-  Pagination
+	Pagination
 }

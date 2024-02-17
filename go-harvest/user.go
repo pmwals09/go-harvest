@@ -25,9 +25,18 @@ type User struct {
 	UpdatedAt                    time.Time `json:"updated_at"`                        // Date and time the user was last updated.
 }
 
-func (c *Client) GetMyProjectAssignments() (ProjectAssignmentResponse, error) {
+type GetProjectAssignmentParameters struct {
+	UpdatedSince time.Time `json:"updated_since" url:"updated_since,omitempty"` // Only return project assignments that have been updated since the given date and time.
+	Page         int       `json:"page" url:"page,omitempty"`                   // DEPRECATED The page number to use in pagination. For instance, if you make a list request and receive 2000 records, your subsequent call can include page=2 to retrieve the next page of the list. (Default: 1)
+	PerPage      int       `json:"per_page" url:"per_page,omitempty"`           // The number of records to return per page. Can range between 1 and 2000.  (Default: 2000)
+}
+
+func (c *Client) GetMyProjectAssignments(params GetProjectAssignmentParameters) (ProjectAssignmentResponse, error) {
 	pa := ProjectAssignmentResponse{}
-	urlTail := "/v2/users/me/project_assignments"
+	urlTail, err := buildPathWithParams[GetProjectAssignmentParameters]("/v2/users/me/project_assignments", params)
+	if err != nil {
+		return pa, err
+	}
 	res, err := c.Get(urlTail)
 	if err != nil {
 		return pa, err

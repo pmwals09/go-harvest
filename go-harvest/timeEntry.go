@@ -7,8 +7,8 @@ import (
 )
 
 type TimeEntryResponse struct {
-  TimeEntries []TimeEntry `json:"time_entries"`
-  Pagination
+	TimeEntries []TimeEntry `json:"time_entries"`
+	Pagination
 }
 
 type ExternalReference struct {
@@ -20,24 +20,9 @@ type ExternalReference struct {
 	ServiceIconURL string `json:"service_icon_url"`
 }
 
-type SpentDate struct {
-  time.Time
-}
-
-func (s *SpentDate) UnmarshalJSON(input []byte) error {
-  newTime, err := time.Parse(time.DateOnly, string(input[1:len(input)-1]))
-  if err != nil {
-    s.Time = time.Time{}
-    return err
-  }
-
-  s.Time = newTime
-  return nil
-}
-
 type TimeEntry struct {
-	ID        uint64    `json:"id"`         // Unique ID for the time entry. Listed as 'bigint' in documentation
-	SpentDate SpentDate `json:"spent_date"` // Date of the time entry.
+	ID        uint64 `json:"id"`         // Unique ID for the time entry. Listed as 'bigint' in documentation
+	SpentDate Date   `json:"spent_date"` // Date of the time entry.
 	User      struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
@@ -58,7 +43,7 @@ type TimeEntry struct {
 	TaskAssignment    TaskAssignment    `json:"task_assignment"`    // A task assignment object of the associated task.
 	ExternalReference ExternalReference `json:"external_reference"` // An object containing the id, group_id, account_id, permalink, service, and service_icon_url of the associated external reference.
 	Invoice           struct {
-		ID     int `json:"id"`
+		ID     int    `json:"id"`
 		Number string `json:"number"`
 	} `json:"invoice"` // Once the time entry has been invoiced, this field will include the associated invoice’s id and number.
 	Hours             float32   `json:"hours"`               // Number of (decimal time) hours tracked in this time entry.
@@ -81,29 +66,48 @@ type TimeEntry struct {
 	UpdatedAt         time.Time `json:"updated_at"`          // Date and time the time entry was last updated. Use the ISO 8601 Format.
 }
 
-func (c *Client) GetTimeEntries() (TimeEntryResponse, error) {
-  tr := TimeEntryResponse{}
-  res, err := c.Get("/v2/time_entries")
-  if err != nil {
-    return tr, err
-  }
-  err = json.NewDecoder(res.Body).Decode(&tr)
-  if err != nil {
-    return tr, err
-  }
-  return tr, nil
+type GetTimeEntryParameters struct {
+	UserID              int       `json:"user_id" url:"user_id,omitempty"`                             // Only return time entries belonging to the user with the given ID.
+	ClientID            int       `json:"client_id" url:"client_id,omitempty"`                         // Only return time entries belonging to the client with the given ID.
+	ProjectID           int       `json:"project_id" url:"project_id,omitempty"`                       // Only return time entries belonging to the project with the given ID.
+	TaskID              int       `json:"task_id" url:"task_id,omitempty"`                             // Only return time entries belonging to the task with the given ID.
+	ExternalReferenceID string    `json:"external_reference_id" url:"external_reference_id,omitempty"` // Only return time entries with the given external_reference ID.
+	IsBilled            bool      `json:"is_billed" url:"is_billed,omitempty"`                         // Pass true to only return time entries that have been invoiced and false to return time entries that have not been invoiced.
+	IsRunning           bool      `json:"is_running" url:"is_running,omitempty"`                       // Pass true to only return running time entries and false to return non-running time entries.
+	UpdatedSince        time.Time `json:"updated_since" url:"updated_since,omitempty"`                 // Only return time entries that have been updated since the given date and time. Use the ISO 8601 Format.
+	From                Date      `json:"from" url:"from,omitempty"`                                   // Only return time entries with a spent_date on or after the given date.
+	To                  Date      `json:"to" url:"to,omitempty"`                                       // Only return time entries with a spent_date on or before the given date.
+	Page                int       `json:"page" url:"page,omitempty"`                                   // The page number to use in pagination. For instance, if you make a list request and receive 2000 records, your subsequent call can include page=2 to retrieve the next page of the list. (Default: 1)
+	PerPage             int       `json:"per_page" url:"per_page,omitempty"`                           // The number of records to return per page. Can range between 1 and 2000. (Default: 2000)
+}
+
+func (c *Client) GetTimeEntries(params GetTimeEntryParameters) (TimeEntryResponse, error) {
+	tr := TimeEntryResponse{}
+	urlTail, err := buildPathWithParams[GetTimeEntryParameters]("/v2/time_entries", params)
+	if err != nil {
+		return tr, err
+	}
+	res, err := c.Get(urlTail)
+	if err != nil {
+		return tr, err
+	}
+	err = json.NewDecoder(res.Body).Decode(&tr)
+	if err != nil {
+		return tr, err
+	}
+	return tr, nil
 }
 
 func (c *Client) GetTimeEntry(id uint64) (TimeEntry, error) {
-  te := TimeEntry{}
-  urlTail := fmt.Sprintf("/v2/time_entries/%d", id)
-  res, err := c.Get(urlTail)
-  if err != nil {
-    return te, err
-  }
-  err = json.NewDecoder(res.Body).Decode(&te)
-  if err != nil {
-    return te, err
-  }
-  return te, nil
+	te := TimeEntry{}
+	urlTail := fmt.Sprintf("/v2/time_entries/%d", id)
+	res, err := c.Get(urlTail)
+	if err != nil {
+		return te, err
+	}
+	err = json.NewDecoder(res.Body).Decode(&te)
+	if err != nil {
+		return te, err
+	}
+	return te, nil
 }

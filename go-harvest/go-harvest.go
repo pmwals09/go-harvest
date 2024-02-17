@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+
+	"github.com/google/go-querystring/query"
 )
 
 type Client struct {
@@ -26,7 +28,7 @@ func NewClient(PAT string, accountID string, userAgent string) *Client {
 }
 
 func (c *Client) Get(urlTail string) (*http.Response, error) {
-  return c.makeRequest("GET", urlTail, nil)
+	return c.makeRequest("GET", urlTail, nil)
 }
 
 func (c *Client) newRequest(method string, urlTail string, body io.Reader) (*http.Request, error) {
@@ -46,34 +48,46 @@ func (c *Client) newRequest(method string, urlTail string, body io.Reader) (*htt
 }
 
 type ErrorCodeResponse struct {
-  StatusCode int
-  Message string
+	StatusCode int
+	Message    string
 }
+
 func (e ErrorCodeResponse) Error() string {
-  return fmt.Sprintf("Error: %d, %s", e.StatusCode, e.Message)
+	return fmt.Sprintf("Error: %d, %s", e.StatusCode, e.Message)
 }
 func (c *Client) makeRequest(method string, urlTail string, body io.Reader) (*http.Response, error) {
-  req, err := c.newRequest(method, urlTail, body)
-  if err != nil {
-    return &http.Response{}, err
-  }
+	req, err := c.newRequest(method, urlTail, body)
+	if err != nil {
+		return &http.Response{}, err
+	}
 
-  res, err := c.Client.Do(req)
-  if err != nil {
-    return res, err
-  }
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return res, err
+	}
 
-  // Handle non-200 results
-  if res.StatusCode < 200 || res.StatusCode >= 300 {
-    // io.ReadAll() will consume the response body, so we need to re-set it
-    ba, err := io.ReadAll(res.Body)
-    res.Body = io.NopCloser(bytes.NewBuffer(ba))
-    if err != nil {
-      return res, err
-    }
-    return res, ErrorCodeResponse{res.StatusCode, string(ba)}
-  }
+	// Handle non-200 results
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		// io.ReadAll() will consume the response body, so we need to re-set it
+		ba, err := io.ReadAll(res.Body)
+		res.Body = io.NopCloser(bytes.NewBuffer(ba))
+		if err != nil {
+			return res, err
+		}
+		return res, ErrorCodeResponse{res.StatusCode, string(ba)}
+	}
 
-  return res, nil
+	return res, nil
 }
 
+func buildPathWithParams[T any](urlTail string, params T) (string, error) {
+	qs, err := query.Values(params)
+	if err != nil {
+		return "", err
+	}
+	queryString := qs.Encode()
+	if queryString != "" {
+		return urlTail + "?" + queryString, nil
+	}
+	return urlTail, nil
+}
