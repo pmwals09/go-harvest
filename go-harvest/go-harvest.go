@@ -2,7 +2,6 @@ package goharvest
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -24,47 +23,6 @@ func NewClient(PAT string, accountID string, userAgent string) *Client {
 		AccountID: accountID,
 		UserAgent: userAgent,
 	}
-}
-
-func (c *Client) GetMyProjectAssignments() (ProjectAssignmentResponse, error) {
-	pa := ProjectAssignmentResponse{}
-	urlTail := "/v2/users/me/project_assignments"
-	res, err := c.Get(urlTail)
-	if err != nil {
-		return pa, err
-	}
-	err = json.NewDecoder(res.Body).Decode(&pa)
-	if err != nil {
-		return pa, err
-	}
-	return pa, nil
-}
-
-func (c *Client) GetMe() (User, error) {
-	u := User{}
-	urlTail := "/v2/users/me"
-	res, err := c.Get(urlTail)
-	if err != nil {
-		return u, err
-	}
-	err = json.NewDecoder(res.Body).Decode(&u)
-	if err != nil {
-		return u, err
-	}
-	return u, nil
-}
-
-func (c *Client) GetTimeEntries() (TimeEntryResponse, error) {
-  tr := TimeEntryResponse{}
-  res, err := c.Get("/v2/time_entries")
-  if err != nil {
-    return tr, err
-  }
-  err = json.NewDecoder(res.Body).Decode(&tr)
-  if err != nil {
-    return tr, err
-  }
-  return tr, nil
 }
 
 func (c *Client) Get(urlTail string) (*http.Response, error) {

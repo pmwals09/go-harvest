@@ -157,7 +157,7 @@ Documentation: [Tasks](https://help.getharvest.com/api-v2/tasks-api/tasks/tasks/
 
 Documentation: [Time Entries](https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/)
 
-- [ ] GET /v2/time_entries
+- [x] GET /v2/time_entries
 - [ ] GET /v2/time_entries/{TIME_ENTRY_ID}
 - [ ] POST /v2/time_entries
 - [ ] PATCH /v2/time_entries/{TIME_ENTRY_ID}

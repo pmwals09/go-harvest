@@ -1,6 +1,9 @@
 package goharvest
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type User struct {
 	ID                           int       `json:"id"`                                // Unique ID for the user.
@@ -20,4 +23,32 @@ type User struct {
 	AvatarURL                    string    `json:"avatar_url"`                        // The URL to the user’s avatar image.
 	CreatedAt                    time.Time `json:"created_at"`                        // Date and time the user was created.
 	UpdatedAt                    time.Time `json:"updated_at"`                        // Date and time the user was last updated.
+}
+
+func (c *Client) GetMyProjectAssignments() (ProjectAssignmentResponse, error) {
+	pa := ProjectAssignmentResponse{}
+	urlTail := "/v2/users/me/project_assignments"
+	res, err := c.Get(urlTail)
+	if err != nil {
+		return pa, err
+	}
+	err = json.NewDecoder(res.Body).Decode(&pa)
+	if err != nil {
+		return pa, err
+	}
+	return pa, nil
+}
+
+func (c *Client) GetMe() (User, error) {
+	u := User{}
+	urlTail := "/v2/users/me"
+	res, err := c.Get(urlTail)
+	if err != nil {
+		return u, err
+	}
+	err = json.NewDecoder(res.Body).Decode(&u)
+	if err != nil {
+		return u, err
+	}
+	return u, nil
 }

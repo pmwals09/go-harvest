@@ -1,6 +1,8 @@
 package goharvest
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -77,4 +79,31 @@ type TimeEntry struct {
 	CostRate          float32   `json:"cost_rate"`           // The cost rate for the time entry.
 	CreatedAt         time.Time `json:"created_at"`          // Date and time the time entry was created. Use the ISO 8601 Format.
 	UpdatedAt         time.Time `json:"updated_at"`          // Date and time the time entry was last updated. Use the ISO 8601 Format.
+}
+
+func (c *Client) GetTimeEntries() (TimeEntryResponse, error) {
+  tr := TimeEntryResponse{}
+  res, err := c.Get("/v2/time_entries")
+  if err != nil {
+    return tr, err
+  }
+  err = json.NewDecoder(res.Body).Decode(&tr)
+  if err != nil {
+    return tr, err
+  }
+  return tr, nil
+}
+
+func (c *Client) GetTimeEntry(id uint64) (TimeEntry, error) {
+  te := TimeEntry{}
+  urlTail := fmt.Sprintf("/v2/time_entries/%d", id)
+  res, err := c.Get(urlTail)
+  if err != nil {
+    return te, err
+  }
+  err = json.NewDecoder(res.Body).Decode(&te)
+  if err != nil {
+    return te, err
+  }
+  return te, nil
 }
