@@ -74,18 +74,17 @@ func main() {
 
 	fmt.Println("POST TIME ENTRY")
 	project := projectAssignmentsResponse.ProjectAssignments[0]
-	startTime := time.Now()
-	endTime := startTime.Add(time.Hour)
+	startTime := time.Date(2024, time.February, 17, 11, 0, 0, 0, time.Now().Location())
+	duration := 1.0
 	timeEntryPost, err := client.CreateTimeEntry(
-		goharvest.CreateTimeEntryBodyStartEnd{
-			UserID:      &user.ID,
-			ProjectID:   project.Project.ID,
-			TaskID:      project.TaskAssignments[0].Task.ID,
-			SpentDate:   goharvest.Date{Time: startTime},
-			StartedTime: &goharvest.KitchenTime{Time: startTime},
-			EndedTime:   &goharvest.KitchenTime{Time: endTime},
-			Notes:       "This is a test",
-      ExternalReference: nil,
+		goharvest.CreateTimeEntryBodyDuration{
+			UserID:            &user.ID,
+			ProjectID:         project.Project.ID,
+			TaskID:            project.TaskAssignments[0].Task.ID,
+			SpentDate:         goharvest.Date{Time: startTime},
+			Hours:             &duration,
+			Notes:             "This is a test",
+			ExternalReference: nil,
 		})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Problem creating time entry: %s", err.Error())

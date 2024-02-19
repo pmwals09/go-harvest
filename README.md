@@ -158,8 +158,8 @@ Documentation: [Tasks](https://help.getharvest.com/api-v2/tasks-api/tasks/tasks/
 Documentation: [Time Entries](https://help.getharvest.com/api-v2/timesheets-api/timesheets/time-entries/)
 
 - [x] GET /v2/time_entries
-- [ ] GET /v2/time_entries/{TIME_ENTRY_ID}
-- [ ] POST /v2/time_entries
+- [x] GET /v2/time_entries/{TIME_ENTRY_ID}
+- [x] POST /v2/time_entries
 - [ ] PATCH /v2/time_entries/{TIME_ENTRY_ID}
 - [ ] DELETE /v2/time_entries/{TIME_ENTRY_ID}/external_reference
 - [ ] DELETE /v2/time_entries/{TIME_ENTRY_ID}
@@ -173,7 +173,7 @@ Documentation:
 - [Project Task Assignments](https://help.getharvest.com/api-v2/projects-api/projects/task-assignments/)
 - [Projects](https://help.getharvest.com/api-v2/projects-api/projects/projects/)
 
-- [ ] GET /v2/user_assignments
+- [x] GET /v2/user_assignments
 - [ ] GET /v2/projects/{PROJECT_ID}/user_assignments
 - [ ] GET /v2/projects/{PROJECT_ID}/user_assignments/{USER_ASSIGNMENT_ID}
 - [ ] POST /v2/projects/{PROJECT_ID}/user_assignments
@@ -210,23 +210,23 @@ Documentation:
 - [User Project Assignments](https://help.getharvest.com/api-v2/users-api/users/project-assignments/)
 - [Users](https://help.getharvest.com/api-v2/users-api/users/users/)
 
-- [-] GET /v2/users/{USER_ID}/teammates (Must be an Administrator)
-- [ ] PATCH /v2/users/{USER_ID}/teammates (Must be an Administrator)
-- [-] GET /v2/users/{USER_ID}/billable_rates (Must be an Administrator or Manager with permission to edit billable rates)
-- [-] GET /v2/users/{USER_ID}/billable_rates/{billable_RATE_ID} (Must be an Administrator or Manager with permission to edit billable rates)
-- [-] POST /v2/users/{USER_ID}/billable_rates (Must be an Administrator or Manager with permission to edit billable rates)
-- [-] GET /v2/users/{USER_ID}/cost_rates (Must be an Administrator)
-- [-] GET /v2/users/{USER_ID}/cost_rates/{COST_RATE_ID} (Must be an Administrator)
-- [-] POST /v2/users/{USER_ID}/cost_rates (Must be an Administrator)
-- [-] GET /v2/users/{USER_ID}/project_assignments (Must be an Administrator or Manager with assigned teammates)
+- [-] GET /v2/users/{USER_ID}/teammates
+- [-] PATCH /v2/users/{USER_ID}/teammates
+- [-] GET /v2/users/{USER_ID}/billable_rates
+- [-] GET /v2/users/{USER_ID}/billable_rates/{billable_RATE_ID}
+- [-] POST /v2/users/{USER_ID}/billable_rates
+- [-] GET /v2/users/{USER_ID}/cost_rates
+- [-] GET /v2/users/{USER_ID}/cost_rates/{COST_RATE_ID}
+- [-] POST /v2/users/{USER_ID}/cost_rates
+- [-] GET /v2/users/{USER_ID}/project_assignments
 - [x] GET /v2/users/me/project_assignments
-- [-] GET /v2/users (Must be an Administrator or Manager with assigned teammates)
+- [-] GET /v2/users
 - [x] GET /v2/users/me
-- [-] GET /v2/users/{USER_ID} (Must be an Administrator or Manager with assigned teammates)
-- [-] POST /v2/users (Must be an Administrator or Manager with assigned teammates)
-- [-] PATCH /v2/users/{USER_ID} (Must be an Administrator or Manager with assigned teammates)
-- [-] PATCH /v2/users/{USER_ID} (Must be an Administrator or Manager with assigned teammates)
-- [-] DELETE /v2/users/{USER_ID} (Must be an Administrator or Manager with assigned teammates)
+- [-] GET /v2/users/{USER_ID}
+- [-] POST /v2/users
+- [-] PATCH /v2/users/{USER_ID}
+- [-] PATCH /v2/users/{USER_ID}
+- [-] DELETE /v2/users/{USER_ID}
 
 ### Reports API
 

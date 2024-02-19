@@ -43,17 +43,17 @@ func (c *Client) newRequest(method string, urlTail string, body any) (*http.Requ
 	if body == nil {
 		req, err = http.NewRequest(method, url, nil)
 	} else {
-    var bodyReader bytes.Buffer
-    err := json.NewEncoder(&bodyReader).Encode(body)
-    fmt.Println(bodyReader.String())
-    if err != nil {
-      return req, err
-    }
+		var bodyReader bytes.Buffer
+		err := json.NewEncoder(&bodyReader).Encode(body)
+		fmt.Println(bodyReader.String())
+		if err != nil {
+			return req, err
+		}
 		req, err = http.NewRequest(method, url, &bodyReader)
 	}
-  if err != nil {
-    return req, err
-  }
+	if err != nil {
+		return req, err
+	}
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Token))
 	req.Header.Set("Harvest-Account-Id", c.AccountID)
 	req.Header.Set("User-Agent", c.UserAgent)

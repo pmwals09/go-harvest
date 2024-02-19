@@ -16,8 +16,8 @@ type User struct {
 	IsContractor                 bool      `json:"is_contractor"`                     // Whether the user is a contractor or an employee.
 	IsActive                     bool      `json:"is_active"`                         // Whether the user is active or archived.
 	WeeklyCapacity               int       `json:"weekly_capacity"`                   // The number of hours per week this person is available to work in seconds, in half hour increments. For example, if a person’s capacity is 35 hours, the API will return 126000 seconds.
-	DefaultHourlyRate            float32   `json:"default_hourly_rate"`               // The billable rate to use for this user when they are added to a project.
-	CostRate                     float32   `json:"cost_rate"`                         // The cost rate to use for this user when calculating a project’s costs vs billable amount.
+	DefaultHourlyRate            float64   `json:"default_hourly_rate"`               // The billable rate to use for this user when they are added to a project.
+	CostRate                     float64   `json:"cost_rate"`                         // The cost rate to use for this user when calculating a project’s costs vs billable amount.
 	Roles                        []string  `json:"roles"`                             // Descriptive names of the business roles assigned to this person. They can be used for filtering reports, and have no effect in their permissions in Harvest.
 	AccessRoles                  []string  `json:"access_roles"`                      // [Access role(s)](https://help.getharvest.com/api-v2/users-api/users/users/#access-roles) that determine the user’s permissions in Harvest. Possible values: `administrator`, `manager` or `member`. Users with the manager role can additionally be granted one or more of these roles: `project_creator`, `billable_rates_manager`, `managed_projects_invoice_drafter`, `managed_projects_invoice_manager`, `client_and_task_manager`, `time_and_expenses_manager`, `estimates_manager`.
 	AvatarURL                    string    `json:"avatar_url"`                        // The URL to the user’s avatar image.

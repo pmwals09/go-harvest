@@ -40,9 +40,9 @@ type TimeEntry struct {
 		ID     int    `json:"id"`
 		Number string `json:"number"`
 	} `json:"invoice"` // Once the time entry has been invoiced, this field will include the associated invoice’s id and number.
-	Hours             float32      `json:"hours"`               // Number of (decimal time) hours tracked in this time entry.
-	HoursWithoutTimer float32      `json:"hours_without_timer"` // Number of (decimal time) hours already tracked in this time entry, before the timer was last started.
-	RoundedHours      float32      `json:"rounded_hours"`       // Number of (decimal time) hours tracked in this time entry used in summary reports and invoices. This value is rounded according to the Time Rounding setting in your Preferences.
+	Hours             float64      `json:"hours"`               // Number of (decimal time) hours tracked in this time entry.
+	HoursWithoutTimer float64      `json:"hours_without_timer"` // Number of (decimal time) hours already tracked in this time entry, before the timer was last started.
+	RoundedHours      float64      `json:"rounded_hours"`       // Number of (decimal time) hours tracked in this time entry used in summary reports and invoices. This value is rounded according to the Time Rounding setting in your Preferences.
 	Notes             string       `json:"notes"`               // Notes attached to the time entry.
 	IsLocked          bool         `json:"is_locked"`           // Whether or not the time entry has been locked.
 	LockedReason      string       `json:"locked_reason"`       // Why the time entry has been locked.
@@ -54,8 +54,8 @@ type TimeEntry struct {
 	IsRunning         bool         `json:"is_running"`          // Whether or not the time entry is currently running.
 	Billable          bool         `json:"billable"`            // Whether or not the time entry is billable.
 	Budgeted          bool         `json:"budgeted"`            // Whether or not the time entry counts towards the project budget.
-	BillableRate      float32      `json:"billable_rate"`       // The billable rate for the time entry.
-	CostRate          float32      `json:"cost_rate"`           // The cost rate for the time entry.
+	BillableRate      float64      `json:"billable_rate"`       // The billable rate for the time entry.
+	CostRate          float64      `json:"cost_rate"`           // The cost rate for the time entry.
 	CreatedAt         time.Time    `json:"created_at"`          // Date and time the time entry was created. Use the ISO 8601 Format.
 	UpdatedAt         time.Time    `json:"updated_at"`          // Date and time the time entry was last updated. Use the ISO 8601 Format.
 }
@@ -95,6 +95,23 @@ func (b CreateTimeEntryBodyStartEnd) GetTimeEntryBodyParams() string {
 	return fmt.Sprintf("%+v", b)
 }
 func (b CreateTimeEntryBodyStartEnd) IsValid() bool {
+	return b.ProjectID != 0 && b.TaskID != 0 && !b.SpentDate.IsZero()
+}
+
+type CreateTimeEntryBodyDuration struct {
+	UserID            *int               `json:"user_id" url:"user_id,omitempty"`                       // The ID of the user to associate with the time entry. Defaults to the currently authenticated user’s ID. - optional
+	ProjectID         int                `json:"project_id" url:"project_id,omitempty"`                 // The ID of the project to associate with the time entry. - required
+	TaskID            int                `json:"task_id" url:"task_id,omitempty"`                       // The ID of the task to associate with the time entry. - required
+	SpentDate         Date               `json:"spent_date" url:"spent_date,omitempty"`                 // The ISO 8601 formatted date the time entry was spent. - required
+	Hours             *float64           `json:"hours" url:"hours,omitempty"`                           // The current amount of time tracked. If provided, the time entry will be created with the specified hours and is_running will be set to false. If not provided, hours will be set to 0.0 and is_running will be set to true. - optional
+	Notes             string             `json:"notes" url:"notes,omitempty"`                           // Any notes to be associated with the time entry. - optional
+	ExternalReference *ExternalReference `json:"external_reference" url:"external_reference,omitempty"` // An object containing the id, group_id, account_id, and permalink of the external reference. - optional
+}
+
+func (b CreateTimeEntryBodyDuration) GetTimeEntryBodyParams() string {
+	return fmt.Sprintf("%+v", b)
+}
+func (b CreateTimeEntryBodyDuration) IsValid() bool {
 	return b.ProjectID != 0 && b.TaskID != 0 && !b.SpentDate.IsZero()
 }
 

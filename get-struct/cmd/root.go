@@ -83,7 +83,7 @@ func writeStruct(attributes []attribute) string {
 		"boolean":  "bool",
 		"string":   "string",
 		"integer":  "int",
-		"decimal":  "float32",
+		"decimal":  "float64",
 		"date":     "Date",
 		"datetime": "time.Time",
 		"time":     "time.Time",
