@@ -1,23 +1,17 @@
 package goharvest
 
 import (
+	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io"
 	"time"
 )
 
 type TimeEntryResponse struct {
 	TimeEntries []TimeEntry `json:"time_entries"`
 	Pagination
-}
-
-type ExternalReference struct {
-	ID             int    `json:"id"`
-	GroupID        int    `json:"group_id"`
-	AccountID      int    `json:"account_id"`
-	Permalink      string `json:"permalink"`
-	Service        string `json:"service"`
-	ServiceIconURL string `json:"service_icon_url"`
 }
 
 type TimeEntry struct {
@@ -46,24 +40,24 @@ type TimeEntry struct {
 		ID     int    `json:"id"`
 		Number string `json:"number"`
 	} `json:"invoice"` // Once the time entry has been invoiced, this field will include the associated invoice’s id and number.
-	Hours             float32   `json:"hours"`               // Number of (decimal time) hours tracked in this time entry.
-	HoursWithoutTimer float32   `json:"hours_without_timer"` // Number of (decimal time) hours already tracked in this time entry, before the timer was last started.
-	RoundedHours      float32   `json:"rounded_hours"`       // Number of (decimal time) hours tracked in this time entry used in summary reports and invoices. This value is rounded according to the Time Rounding setting in your Preferences.
-	Notes             string    `json:"notes"`               // Notes attached to the time entry.
-	IsLocked          bool      `json:"is_locked"`           // Whether or not the time entry has been locked.
-	LockedReason      string    `json:"locked_reason"`       // Why the time entry has been locked.
-	IsClosed          bool      `json:"is_closed"`           // Whether or not the time entry has been approved via Timesheet Approval.
-	IsBilled          bool      `json:"is_billed"`           // Whether or not the time entry has been marked as invoiced.
-	TimerStartedAt    time.Time `json:"timer_started_at"`    // Date and time the running timer was started (if tracking by duration). Use the ISO 8601 Format. Returns null for stopped timers.
-	StartedTime       time.Time `json:"started_time"`        // Time the time entry was started (if tracking by start/end times).
-	EndedTime         time.Time `json:"ended_time"`          // Time the time entry was ended (if tracking by start/end times).
-	IsRunning         bool      `json:"is_running"`          // Whether or not the time entry is currently running.
-	Billable          bool      `json:"billable"`            // Whether or not the time entry is billable.
-	Budgeted          bool      `json:"budgeted"`            // Whether or not the time entry counts towards the project budget.
-	BillableRate      float32   `json:"billable_rate"`       // The billable rate for the time entry.
-	CostRate          float32   `json:"cost_rate"`           // The cost rate for the time entry.
-	CreatedAt         time.Time `json:"created_at"`          // Date and time the time entry was created. Use the ISO 8601 Format.
-	UpdatedAt         time.Time `json:"updated_at"`          // Date and time the time entry was last updated. Use the ISO 8601 Format.
+	Hours             float32      `json:"hours"`               // Number of (decimal time) hours tracked in this time entry.
+	HoursWithoutTimer float32      `json:"hours_without_timer"` // Number of (decimal time) hours already tracked in this time entry, before the timer was last started.
+	RoundedHours      float32      `json:"rounded_hours"`       // Number of (decimal time) hours tracked in this time entry used in summary reports and invoices. This value is rounded according to the Time Rounding setting in your Preferences.
+	Notes             string       `json:"notes"`               // Notes attached to the time entry.
+	IsLocked          bool         `json:"is_locked"`           // Whether or not the time entry has been locked.
+	LockedReason      string       `json:"locked_reason"`       // Why the time entry has been locked.
+	IsClosed          bool         `json:"is_closed"`           // Whether or not the time entry has been approved via Timesheet Approval.
+	IsBilled          bool         `json:"is_billed"`           // Whether or not the time entry has been marked as invoiced.
+	TimerStartedAt    time.Time    `json:"timer_started_at"`    // Date and time the running timer was started (if tracking by duration). Use the ISO 8601 Format. Returns null for stopped timers.
+	StartedTime       *KitchenTime `json:"started_time"`        // Time the time entry was started (if tracking by start/end times).
+	EndedTime         *KitchenTime `json:"ended_time"`          // Time the time entry was ended (if tracking by start/end times).
+	IsRunning         bool         `json:"is_running"`          // Whether or not the time entry is currently running.
+	Billable          bool         `json:"billable"`            // Whether or not the time entry is billable.
+	Budgeted          bool         `json:"budgeted"`            // Whether or not the time entry counts towards the project budget.
+	BillableRate      float32      `json:"billable_rate"`       // The billable rate for the time entry.
+	CostRate          float32      `json:"cost_rate"`           // The cost rate for the time entry.
+	CreatedAt         time.Time    `json:"created_at"`          // Date and time the time entry was created. Use the ISO 8601 Format.
+	UpdatedAt         time.Time    `json:"updated_at"`          // Date and time the time entry was last updated. Use the ISO 8601 Format.
 }
 
 type GetTimeEntryParameters struct {
@@ -79,6 +73,29 @@ type GetTimeEntryParameters struct {
 	To                  Date      `json:"to" url:"to,omitempty"`                                       // Only return time entries with a spent_date on or before the given date.
 	Page                int       `json:"page" url:"page,omitempty"`                                   // The page number to use in pagination. For instance, if you make a list request and receive 2000 records, your subsequent call can include page=2 to retrieve the next page of the list. (Default: 1)
 	PerPage             int       `json:"per_page" url:"per_page,omitempty"`                           // The number of records to return per page. Can range between 1 and 2000. (Default: 2000)
+}
+
+type CreateTimeEntryBody interface {
+	GetTimeEntryBodyParams() string
+	IsValid() bool
+}
+
+type CreateTimeEntryBodyStartEnd struct {
+	UserID            *int               `json:"user_id,omitempty" url:"user_id,omitempty"`                       // The ID of the user to associate with the time entry. Defaults to the currently authenticated user’s ID. - optional
+	ProjectID         int                `json:"project_id" url:"project_id,omitempty"`                           // The ID of the project to associate with the time entry. - required
+	TaskID            int                `json:"task_id" url:"task_id,omitempty"`                                 // The ID of the task to associate with the time entry. - required
+	SpentDate         Date               `json:"spent_date" url:"spent_date,omitempty"`                           // The ISO 8601 formatted date the time entry was spent. - required
+	StartedTime       *KitchenTime       `json:"started_time,omitempty" url:"started_time,omitempty"`             // The time the entry started. Defaults to the current time. Example: “8:00am”. - optional
+	EndedTime         *KitchenTime       `json:"ended_time,omitempty" url:"ended_time,omitempty"`                 // The time the entry ended. If provided, is_running will be set to false. If not provided, is_running will be set to true. - optional
+	Notes             string             `json:"notes,omitempty" url:"notes,omitempty"`                           // Any notes to be associated with the time entry. - optional
+	ExternalReference *ExternalReference `json:"external_reference,omitempty" url:"external_reference,omitempty"` // An object containing the id, group_id, account_id, and permalink of the external reference. - optional
+}
+
+func (b CreateTimeEntryBodyStartEnd) GetTimeEntryBodyParams() string {
+	return fmt.Sprintf("%+v", b)
+}
+func (b CreateTimeEntryBodyStartEnd) IsValid() bool {
+	return b.ProjectID != 0 && b.TaskID != 0 && !b.SpentDate.IsZero()
 }
 
 func (c *Client) GetTimeEntries(params GetTimeEntryParameters) (TimeEntryResponse, error) {
@@ -110,4 +127,28 @@ func (c *Client) GetTimeEntry(id uint64) (TimeEntry, error) {
 		return te, err
 	}
 	return te, nil
+}
+
+func (c *Client) CreateTimeEntry(body CreateTimeEntryBody) (TimeEntry, error) {
+	te := TimeEntry{}
+	if body.IsValid() {
+		urlTail := "/v2/time_entries"
+		fmt.Printf("%+v\n", body)
+		res, err := c.Post(urlTail, body)
+		ba, _ := io.ReadAll(res.Body)
+		newResBa := bytes.NewBuffer(ba)
+		newBody := io.NopCloser(newResBa)
+		res.Body = newBody
+		fmt.Println(string(ba))
+		if err != nil {
+			return te, err
+		}
+		err = json.NewDecoder(res.Body).Decode(&te)
+		if err != nil {
+			return te, err
+		}
+		return te, nil
+	} else {
+		return te, errors.New("Invalid body")
+	}
 }

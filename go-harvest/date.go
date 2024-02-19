@@ -1,6 +1,8 @@
 package goharvest
 
-import "time"
+import (
+	"time"
+)
 
 type Date struct {
 	time.Time
@@ -15,4 +17,9 @@ func (s *Date) UnmarshalJSON(input []byte) error {
 
 	s.Time = newTime
 	return nil
+}
+
+func (s Date) MarshalJSON() ([]byte, error) {
+  str := s.Format(time.DateOnly)
+  return []byte(`"`+str+`"`), nil
 }

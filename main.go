@@ -3,10 +3,24 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/pmwals09/go-harvest/go-harvest"
 )
+
+type KT struct {
+	time.Time
+}
+
+func (k KT) MarshalJSON() ([]byte, error) {
+	str := k.Format(time.Kitchen)
+	return []byte(`"` + str + `"`), nil
+}
+
+type Obj struct {
+	Key KT `json:"key"`
+}
 
 func main() {
 	// TODO: Should be in .env or by flag, flag takes precedence
@@ -27,9 +41,12 @@ func main() {
 	fmt.Printf("%+v\n\n", user)
 
 	fmt.Println("PROJECT ASSIGNMENTS")
-	projectAssignmentsResponse, err := client.GetMyProjectAssignments(goharvest.GetProjectAssignmentParameters{})
+	projectAssignmentsResponse, err := client.GetMyProjectAssignments(
+		goharvest.GetProjectAssignmentParameters{})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Problem getting current user project assignments: %s", err.Error())
+		fmt.Fprintf(
+			os.Stderr,
+			"Problem getting current user project assignments: %s", err.Error())
 	}
 	for _, pa := range projectAssignmentsResponse.ProjectAssignments {
 		code, name, clientName := pa.Project.Code, pa.Project.Name, pa.Client.Name
@@ -42,7 +59,8 @@ func main() {
 	fmt.Println()
 
 	fmt.Println("TIME ENTRIES")
-	timeEntriesResponse, err := client.GetTimeEntries(goharvest.GetTimeEntryParameters{})
+	timeEntriesResponse, err := client.GetTimeEntries(
+		goharvest.GetTimeEntryParameters{})
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Problem getting time entries: %s", err.Error())
 	}
@@ -53,4 +71,24 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Problem getting time entry: %s", err.Error())
 	}
 	fmt.Printf("%+v\n\n", timeEntry)
+
+	fmt.Println("POST TIME ENTRY")
+	project := projectAssignmentsResponse.ProjectAssignments[0]
+	startTime := time.Now()
+	endTime := startTime.Add(time.Hour)
+	timeEntryPost, err := client.CreateTimeEntry(
+		goharvest.CreateTimeEntryBodyStartEnd{
+			UserID:      &user.ID,
+			ProjectID:   project.Project.ID,
+			TaskID:      project.TaskAssignments[0].Task.ID,
+			SpentDate:   goharvest.Date{Time: startTime},
+			StartedTime: &goharvest.KitchenTime{Time: startTime},
+			EndedTime:   &goharvest.KitchenTime{Time: endTime},
+			Notes:       "This is a test",
+      ExternalReference: nil,
+		})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem creating time entry: %s", err.Error())
+	}
+	fmt.Printf("%+v\n\n", timeEntryPost)
 }

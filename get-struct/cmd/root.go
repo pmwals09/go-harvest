@@ -6,6 +6,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/gocolly/colly"
@@ -35,22 +36,32 @@ var rootCmd = &cobra.Command{
 		attributes := []attribute{}
 		col := colly.NewCollector()
 		col.OnHTML(selector, func(e *colly.HTMLElement) {
+			isRequestBody := false
 			e.ForEach("tr", func(i int, element *colly.HTMLElement) {
-				if i > 0 {
-					cols := strings.Split(strings.Trim(element.Text, " \n"), "\n")
-					attributes = append(attributes, attribute{cols[0], cols[1], cols[2]})
+				cols := strings.Split(strings.Trim(element.Text, " \n"), "\n")
+				for j, c := range cols {
+					cols[j] = strings.Trim(c, " \n")
+				}
+				if i == 0 {
+					isRequestBody = reflect.DeepEqual(cols, []string{"Parameter", "Type", "Required", "Description"})
+				} else if i > 0 {
+					if isRequestBody {
+						attributes = append(attributes, attribute{cols[0], cols[1], cols[3] + " - " + cols[2]})
+					} else {
+						attributes = append(attributes, attribute{cols[0], cols[1], cols[2]})
+					}
 				}
 			})
 		})
 		col.Visit(URL)
 
-    structString := writeStruct(attributes)
-    err := writeStructFile(structString)
-    if err != nil {
-      fmt.Fprintf(os.Stderr, "Error writing struct: %s", err.Error())
-    } else {
-      fmt.Println("Success!")
-    }
+		structString := writeStruct(attributes)
+		err := writeStructFile(structString)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Error writing struct: %s", err.Error())
+		} else {
+			fmt.Println("Success!")
+		}
 	},
 }
 
@@ -68,27 +79,27 @@ func init() {
 }
 
 func writeStruct(attributes []attribute) string {
-  typeMap := map[string]string {
-    "boolean": "bool",
-    "string": "string",
-    "integer": "int",
-    "decimal": "float32",
-    "date": "Date",
-    "datetime": "time.Time",
-    "time": "time.Time",
-    "array": "[]int",
-    "object": "struct{}",
-  }
+	typeMap := map[string]string{
+		"boolean":  "bool",
+		"string":   "string",
+		"integer":  "int",
+		"decimal":  "float32",
+		"date":     "Date",
+		"datetime": "time.Time",
+		"time":     "time.Time",
+		"array":    "[]int",
+		"object":   "struct{}",
+	}
 	structString := strings.Builder{}
 	structString.WriteString(fmt.Sprintf("type %s struct {\n", structName))
 	for _, a := range attributes {
 		attributeName := snakeToPascal(strings.Trim(a.jsonName, " "))
-    structString.WriteString("\t")
+		structString.WriteString("\t")
 		structString.WriteString(attributeName)
 		structString.WriteString(" ")
 		structString.WriteString(typeMap[strings.Trim(a.simpleType, " ")])
 		structString.WriteString(" ")
-    structString.WriteString(fmt.Sprintf("`json:\"%s\" url:\"%s,omitempty\"`", strings.Trim(a.jsonName, " "), strings.Trim(a.jsonName, " ")))
+		structString.WriteString(fmt.Sprintf("`json:\"%s\" url:\"%s,omitempty\"`", strings.Trim(a.jsonName, " "), strings.Trim(a.jsonName, " ")))
 		structString.WriteString(" ")
 		structString.WriteString("// ")
 		structString.WriteString(strings.Trim(a.description, " "))
@@ -99,29 +110,29 @@ func writeStruct(attributes []attribute) string {
 }
 
 func snakeToPascal(s string) string {
-  exceptions := map[string]string {
-    "Id": "ID",
-    "Url": "URL",
-  }
+	exceptions := map[string]string{
+		"Id":  "ID",
+		"Url": "URL",
+	}
 	words := strings.Split(s, "_")
 	var out string
 	for _, word := range words {
-    w := cases.Title(language.AmericanEnglish).String(word)
-    if v, ok := exceptions[w]; ok {
-      out += v
-    } else {
-      out += w
-    }
+		w := cases.Title(language.AmericanEnglish).String(word)
+		if v, ok := exceptions[w]; ok {
+			out += v
+		} else {
+			out += w
+		}
 	}
 	return out
 }
 
 func writeStructFile(structString string) error {
-  if _, err := os.Stat("./dist"); !os.IsExist(err) {
-    err := os.Mkdir("./dist", 0755)
-    if err != nil {
-      return err
-    }
-  }
-  return os.WriteFile(fmt.Sprintf("./dist/%s.go", structName), []byte(structString), 0644)
+	if _, err := os.Stat("./dist"); err != nil && !os.IsExist(err) {
+		err := os.Mkdir("./dist", 0755)
+		if err != nil {
+			return err
+		}
+	}
+	return os.WriteFile(fmt.Sprintf("./dist/%s.go", structName), []byte(structString), 0644)
 }

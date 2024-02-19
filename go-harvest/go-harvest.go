@@ -2,6 +2,7 @@ package goharvest
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -31,18 +32,32 @@ func (c *Client) Get(urlTail string) (*http.Response, error) {
 	return c.makeRequest("GET", urlTail, nil)
 }
 
-func (c *Client) newRequest(method string, urlTail string, body io.Reader) (*http.Request, error) {
+func (c *Client) Post(urlTail string, body any) (*http.Response, error) {
+	return c.makeRequest("POST", urlTail, body)
+}
+
+func (c *Client) newRequest(method string, urlTail string, body any) (*http.Request, error) {
 	url := c.BasePath + urlTail
 	var req *http.Request
 	var err error
 	if body == nil {
 		req, err = http.NewRequest(method, url, nil)
 	} else {
-		req, err = http.NewRequest(method, url, body)
+    var bodyReader bytes.Buffer
+    err := json.NewEncoder(&bodyReader).Encode(body)
+    fmt.Println(bodyReader.String())
+    if err != nil {
+      return req, err
+    }
+		req, err = http.NewRequest(method, url, &bodyReader)
 	}
+  if err != nil {
+    return req, err
+  }
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Token))
 	req.Header.Set("Harvest-Account-Id", c.AccountID)
 	req.Header.Set("User-Agent", c.UserAgent)
+	req.Header.Set("Content-Type", "application/json")
 
 	return req, err
 }
@@ -55,7 +70,7 @@ type ErrorCodeResponse struct {
 func (e ErrorCodeResponse) Error() string {
 	return fmt.Sprintf("Error: %d, %s", e.StatusCode, e.Message)
 }
-func (c *Client) makeRequest(method string, urlTail string, body io.Reader) (*http.Response, error) {
+func (c *Client) makeRequest(method string, urlTail string, body any) (*http.Response, error) {
 	req, err := c.newRequest(method, urlTail, body)
 	if err != nil {
 		return &http.Response{}, err
