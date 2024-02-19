@@ -5,6 +5,10 @@ import (
 	"time"
 )
 
+// A wrapper to facilitate marshalling time.Time types into a KitchenTime
+// string for API calls, and vice versa. Note that when unmarhsalling
+// JSON, we have only the time text string, and not the date, so the date
+// portion of the time.Time value will be unreliable.
 type KitchenTime struct {
 	time.Time
 }

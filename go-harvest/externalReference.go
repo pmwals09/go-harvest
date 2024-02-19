@@ -1,5 +1,8 @@
 package goharvest
 
+// Documentation is thin, but this appears to be a reference to a celandar
+// event. I.e., this would be used to match a time entry with a
+// GCal import.
 type ExternalReference struct {
 	ID             int    `json:"id"`
 	GroupID        int    `json:"group_id"`

@@ -15,23 +15,37 @@ import (
 )
 
 func main() {
-    client := harvest.NewClient()
     timeEntries := client.ReadTimeEntries()
-    newTimeEntry := harvest.TimeEntry{}
-    client.CreateTimeEntry(newTimeEntry)
+
+    client := harvest.NewClient(token, accountID, userAgent)
+    newTimeEntry := goharvest.CreateTimeEntryBodyDuration{
+        UserID: &user.ID,
+        ProjectID: project.Project.ID,
+        TaskID: project.TaskAssignments[0].Task.ID,
+        SpentDate: goharvest.Date{Time: startTime}
+        Hours: &duration,
+        Notes: "These are the notes"
+        ExternalReference: nil,
+    }
+    timeEntryRes, err := client.CreateTimeEntry(newTimeEntry)
 }
 ```
 
 Most of the endpoints in question require authentication.
-Harvest allows for two types of authentication - the only one supported here is thePersonal Access Token (PAT).
+Harvest allows for two types of authentication - the only one fully supported here is thePersonal Access Token (PAT).
 You must have a valid `HARVEST_PAT` environment variable set in order to use this library.
+If you would like to use OAuth, you will need to handle the OAuth flow yourself, including token renewal - the focus of this module is API coverage.
+
+## Project Structure
+
+The sole package intended to be used is the `goharvest` module.
+This module consists of the `Client` that handles making the API requests, and the various types needed to create or utilize those requests.
 
 ## FAQ
 
 ### Do I really need to provide an email or contact link?
 
 Yes, you really do, according to [Harvest's documentation](https://help.getharvest.com/api-v2/introduction/overview/general/#api-requests). You can't use mine, sorry.
-
 
 ## API Coverage
 
@@ -52,12 +66,14 @@ Yes, you really do, according to [Harvest's documentation](https://help.getharve
 
 Documentation: [Authentication](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/)
 
-- [ ] Personal Access Tokens
+- [x] Personal Access Token
 - [ ] OAuth2
+  - Possibly in the future. For the moment the client simply accepts and uses a token, and would rely on the application to manage the OAuth flow.
 
 ### Clients API
 
 Documentation:
+
 - [Client Contacts](https://help.getharvest.com/api-v2/clients-api/clients/contacts/)
 - [Clients](https://help.getharvest.com/api-v2/clients-api/clients/clients/)
 
@@ -82,6 +98,7 @@ Documentation: [Company](https://help.getharvest.com/api-v2/company-api/company/
 ### Invoices API
 
 Documentation:
+
 - [Invoice Messages](https://help.getharvest.com/api-v2/invoices-api/invoices/invoice-messages/)
 - [Invoice Payments](https://help.getharvest.com/api-v2/invoices-api/invoices/invoice-payments/)
 - [Invoices](https://help.getharvest.com/api-v2/invoices-api/invoices/invoices/)
@@ -108,6 +125,7 @@ Documentation:
 ### Estimates API
 
 Documentation:
+
 - [Estimate Messages](https://help.getharvest.com/api-v2/estimates-api/estimates/estimate-messages/)
 - [Estimates](https://help.getharvest.com/api-v2/estimates-api/estimates/estimates/)
 - [Estimate Item Categories](https://help.getharvest.com/api-v2/estimates-api/estimates/estimate-item-categories/)
@@ -129,6 +147,7 @@ Documentation:
 ### Expenses API
 
 Documentation:
+
 - [Expenses](https://help.getharvest.com/api-v2/expenses-api/expenses/expenses/)
 - [Expense Categories](https://help.getharvest.com/api-v2/expenses-api/expenses/expense-categories/)
 
@@ -169,6 +188,7 @@ Documentation: [Time Entries](https://help.getharvest.com/api-v2/timesheets-api/
 ### Projects API
 
 Documentation:
+
 - [Project User Assignments](https://help.getharvest.com/api-v2/projects-api/projects/user-assignments/)
 - [Project Task Assignments](https://help.getharvest.com/api-v2/projects-api/projects/task-assignments/)
 - [Projects](https://help.getharvest.com/api-v2/projects-api/projects/projects/)
@@ -204,38 +224,40 @@ Documentation: [Roles](https://help.getharvest.com/api-v2/roles-api/roles/roles/
 ### Users API
 
 Documentation:
+
 - [User Teammates](https://help.getharvest.com/api-v2/users-api/users/teammates/)
 - [User Billable Rates](https://help.getharvest.com/api-v2/users-api/users/billable-rates/)
 - [User Cost Rates](https://help.getharvest.com/api-v2/users-api/users/cost-rates/)
 - [User Project Assignments](https://help.getharvest.com/api-v2/users-api/users/project-assignments/)
 - [Users](https://help.getharvest.com/api-v2/users-api/users/users/)
 
-- [-] GET /v2/users/{USER_ID}/teammates
-- [-] PATCH /v2/users/{USER_ID}/teammates
-- [-] GET /v2/users/{USER_ID}/billable_rates
-- [-] GET /v2/users/{USER_ID}/billable_rates/{billable_RATE_ID}
-- [-] POST /v2/users/{USER_ID}/billable_rates
-- [-] GET /v2/users/{USER_ID}/cost_rates
-- [-] GET /v2/users/{USER_ID}/cost_rates/{COST_RATE_ID}
-- [-] POST /v2/users/{USER_ID}/cost_rates
-- [-] GET /v2/users/{USER_ID}/project_assignments
+- [ ] GET /v2/users/{USER_ID}/teammates
+- [ ] PATCH /v2/users/{USER_ID}/teammates
+- [ ] GET /v2/users/{USER_ID}/billable_rates
+- [ ] GET /v2/users/{USER_ID}/billable_rates/{billable_RATE_ID}
+- [ ] POST /v2/users/{USER_ID}/billable_rates
+- [ ] GET /v2/users/{USER_ID}/cost_rates
+- [ ] GET /v2/users/{USER_ID}/cost_rates/{COST_RATE_ID}
+- [ ] POST /v2/users/{USER_ID}/cost_rates
+- [ ] GET /v2/users/{USER_ID}/project_assignments
 - [x] GET /v2/users/me/project_assignments
-- [-] GET /v2/users
+- [ ] GET /v2/users
 - [x] GET /v2/users/me
-- [-] GET /v2/users/{USER_ID}
-- [-] POST /v2/users
-- [-] PATCH /v2/users/{USER_ID}
-- [-] PATCH /v2/users/{USER_ID}
-- [-] DELETE /v2/users/{USER_ID}
+- [ ] GET /v2/users/{USER_ID}
+- [ ] POST /v2/users
+- [ ] PATCH /v2/users/{USER_ID}
+- [ ] PATCH /v2/users/{USER_ID}
+- [ ] DELETE /v2/users/{USER_ID}
 
 ### Reports API
 
 Documentation:
+
 - [Expense Reports](https://help.getharvest.com/api-v2/reports-api/reports/expense-reports/)
 - [Uninvoiced Report](https://help.getharvest.com/api-v2/reports-api/reports/uninvoiced-report/)
 - [Time Reports](https://help.getharvest.com/api-v2/reports-api/reports/time-reports/)
 - [Project Budget Report](https://help.getharvest.com/api-v2/reports-api/reports/project-budget-report/)
- 
+
 - [ ] GET /v2/reports/expenses/clients
 - [ ] GET /v2/reports/expenses/projects
 - [ ] GET /v2/reports/expenses/categories

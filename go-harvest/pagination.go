@@ -1,5 +1,7 @@
 package goharvest
 
+// Properties included on a variety of calls to simplify pagination.
+// Harvest uses cursor-based pagination.
 type Pagination struct {
 	PerPage      int  `json:"per_page"`
 	TotalPages   int  `json:"total_pages"`

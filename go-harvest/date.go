@@ -4,6 +4,8 @@ import (
 	"time"
 )
 
+// A wrapper to facilitate marshalling time.Time types into a DateOnly
+// string for API calls, and vice versa.
 type Date struct {
 	time.Time
 }
