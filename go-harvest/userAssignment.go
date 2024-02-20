@@ -13,7 +13,7 @@ type UserAssignment struct {
 		Code string `json:"code"`
 	} `json:"project"`
 
-  // An object containing the id and name of the associated user.
+	// An object containing the id and name of the associated user.
 	User struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
@@ -26,13 +26,13 @@ type UserAssignment struct {
 	IsProjectManager bool `json:"is_project_manager"`
 
 	// Determines which billable rate(s) will be used on the project for this
-  // user when bill_by is People. When true, the project will use the
-  // user’s default billable rates. When false, the project will use the
-  // custom rate defined on this user assignment.
+	// user when bill_by is People. When true, the project will use the
+	// user’s default billable rates. When false, the project will use the
+	// custom rate defined on this user assignment.
 	UseDefaultRates bool `json:"use_default_rates"`
 
 	// Custom rate used when the project’s bill_by is People and use_default
-  // rates is false.
+	// rates is false.
 	HourlyRate float64 `json:"hourly_rate"`
 
 	// Budget used when the project’s budget_by is person.

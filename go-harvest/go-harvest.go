@@ -12,11 +12,11 @@ import (
 
 type Client struct {
 	// The base path of the Harvest API, as detailed on Harvest's
-  // documentation site
+	// documentation site
 	BasePath string
 
 	// The token to use when making requests, provided by the application.
-  // Harvest provides OAuth or PAT style authentication.
+	// Harvest provides OAuth or PAT style authentication.
 	Token string
 
 	// The HTTP Client that does the heavy lifting
@@ -26,9 +26,9 @@ type Client struct {
 	AccountID string
 
 	// The UserAgent to use when making requests. This is a string that
-  // typically takes the form of "<appName> (<contact>)"; i.e.:
-  // "MyHarvestApp (https://www.myharvestapp.com/contact)" or
-  // "MyHarvestApp (myemail@email.com)"
+	// typically takes the form of "<appName> (<contact>)"; i.e.:
+	// "MyHarvestApp (https://www.myharvestapp.com/contact)" or
+	// "MyHarvestApp (myemail@email.com)"
 	UserAgent string
 }
 
@@ -53,6 +53,10 @@ func (c *Client) Get(urlTail string) (*http.Response, error) {
 // using the provided request body.
 func (c *Client) Post(urlTail string, body any) (*http.Response, error) {
 	return c.makeRequest("POST", urlTail, body)
+}
+
+func (c *Client) Patch(urlTail string, body any) (*http.Response, error) {
+	return c.makeRequest("PATCH", urlTail, body)
 }
 
 // Creates a new request with the provided method, urlTail, and body,
@@ -88,6 +92,7 @@ type ErrorCodeResponse struct {
 	StatusCode int
 	Message    string
 }
+
 func (e ErrorCodeResponse) Error() string {
 	return fmt.Sprintf("Error: %d, %s", e.StatusCode, e.Message)
 }

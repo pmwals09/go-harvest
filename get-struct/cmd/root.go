@@ -93,17 +93,18 @@ func writeStruct(attributes []attribute) string {
 	structString := strings.Builder{}
 	structString.WriteString(fmt.Sprintf("type %s struct {\n", structName))
 	for _, a := range attributes {
+		for _, l := range makeLines(a.description, 73) {
+			structString.WriteString("\t// " + l)
+		}
+		structString.WriteString("\n")
 		attributeName := snakeToPascal(strings.Trim(a.jsonName, " "))
 		structString.WriteString("\t")
 		structString.WriteString(attributeName)
-		structString.WriteString(" ")
+		structString.WriteString("\t")
 		structString.WriteString(typeMap[strings.Trim(a.simpleType, " ")])
-		structString.WriteString(" ")
+		structString.WriteString("\t")
 		structString.WriteString(fmt.Sprintf("`json:\"%s\" url:\"%s,omitempty\"`", strings.Trim(a.jsonName, " "), strings.Trim(a.jsonName, " ")))
-		structString.WriteString(" ")
-		structString.WriteString("// ")
-		structString.WriteString(strings.Trim(a.description, " "))
-		structString.WriteString("\n")
+		structString.WriteString("\n\n")
 	}
 	structString.WriteString("}\n")
 	return structString.String()
@@ -135,4 +136,25 @@ func writeStructFile(structString string) error {
 		}
 	}
 	return os.WriteFile(fmt.Sprintf("./dist/%s.go", structName), []byte(structString), 0644)
+}
+
+func makeLines(s string, maxLen int) []string {
+	out := []string{}
+	line := []string{}
+	words := strings.Fields(strings.Trim(s, " \n"))
+	lineTotal := 0
+	for _, w := range words {
+		if lineTotal + (len(line) - 1) +len(w) > maxLen {
+			out = append(out, strings.Join(line, " ") + "\n")
+			line = []string{w}
+			lineTotal = len(w)
+		} else {
+			line = append(line, w)
+			lineTotal += len(w)
+		}
+	}
+	if len(line) > 0 {
+		out = append(out, strings.Join(line, " "))
+	}
+	return out
 }

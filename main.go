@@ -9,24 +9,11 @@ import (
 	"github.com/pmwals09/go-harvest/go-harvest"
 )
 
-type KT struct {
-	time.Time
-}
-
-func (k KT) MarshalJSON() ([]byte, error) {
-	str := k.Format(time.Kitchen)
-	return []byte(`"` + str + `"`), nil
-}
-
-type Obj struct {
-	Key KT `json:"key"`
-}
-
 func main() {
-	// TODO: Should be in .env or by flag, flag takes precedence
-	err := godotenv.Load()
+	err := parseEnv()
 	if err != nil {
-		fmt.Println("Error loading env")
+		fmt.Println("Error loading env:", err.Error())
+		os.Exit(1)
 	}
 	PAT := os.Getenv("HARVEST_PAT")
 	accountID := os.Getenv("HARVEST_ACCOUNT_ID")
@@ -58,19 +45,19 @@ func main() {
 	}
 	fmt.Println()
 
-	fmt.Println("TIME ENTRIES")
-	timeEntriesResponse, err := client.GetTimeEntries(
-		goharvest.GetTimeEntryParameters{})
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Problem getting time entries: %s", err.Error())
-	}
+	// fmt.Println("TIME ENTRIES")
+	// timeEntriesResponse, err := client.GetTimeEntries(
+	// 	goharvest.GetTimeEntryParameters{})
+	// if err != nil {
+	// 	fmt.Fprintf(os.Stderr, "Problem getting time entries: %s", err.Error())
+	// }
 
-	fmt.Println("TIME ENTRY")
-	timeEntry, err := client.GetTimeEntry(timeEntriesResponse.TimeEntries[0].ID)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Problem getting time entry: %s", err.Error())
-	}
-	fmt.Printf("%+v\n\n", timeEntry)
+	// fmt.Println("TIME ENTRY")
+	// timeEntry, err := client.GetTimeEntry(timeEntriesResponse.TimeEntries[0].ID)
+	// if err != nil {
+	// 	fmt.Fprintf(os.Stderr, "Problem getting time entry: %s", err.Error())
+	// }
+	// fmt.Printf("%+v\n\n", timeEntry)
 
 	fmt.Println("POST TIME ENTRY")
 	project := projectAssignmentsResponse.ProjectAssignments[0]
@@ -87,7 +74,27 @@ func main() {
 			ExternalReference: nil,
 		})
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Problem creating time entry: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Problem creating time entry: %s\n", err.Error())
 	}
 	fmt.Printf("%+v\n\n", timeEntryPost)
+
+	fmt.Println("COMPANY")
+	company, err := client.GetCompany()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem getting company: %s\n", err.Error())
+	}
+	fmt.Printf("%+v\n", company)
+
+	newCapacity := 10 * 60 * 60
+	company, err = client.UpdateCompany(goharvest.CompanyUpdateParameters{
+		WeeklyCapacity: &newCapacity,
+	})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem updating company: %s\n", err.Error())
+	}
+	fmt.Printf("%+v\n", company)
+}
+
+func parseEnv() error {
+	return godotenv.Load()
 }

@@ -302,8 +302,8 @@ func (c *Client) GetTimeEntry(id uint64) (TimeEntry, error) {
 
 // Creates a new time entry object. Returns a time entry object and a
 // 201 Created response code if the call succeeded.
-// 
-// This same function is used to create time entries when an account is 
+//
+// This same function is used to create time entries when an account is
 // configured to track time via duration or via start and end time.
 // Harvest will create the time entry accordingly depending on the account
 // settings. You can verify this by visiting the Settings page in your

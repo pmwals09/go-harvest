@@ -92,8 +92,8 @@ Documentation:
 
 Documentation: [Company](https://help.getharvest.com/api-v2/company-api/company/company/)
 
-- [ ] GET /v2/company
-- [ ] PATCH /v2/company
+- [x] GET /v2/company
+- [x] PATCH /v2/company
 
 ### Invoices API
 

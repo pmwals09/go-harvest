@@ -57,4 +57,3 @@ type ProjectAssignment struct {
 	// Array of task assignment objects associated with the project.
 	TaskAssignments []TaskAssignment `json:"task_assignments"`
 }
-
