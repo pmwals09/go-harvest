@@ -92,6 +92,22 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Problem deleting time entry: %s\n", err.Error())
 	}
 
+  // return b.ProjectID != 0 && b.TaskID != 0 && !b.SpentDate.IsZero()
+  te, err := client.CreateTimeEntry(goharvest.CreateTimeEntryBodyStartEnd{
+    ProjectID:         project.Project.ID,
+    TaskID:            project.TaskAssignments[0].Task.ID,
+    SpentDate:         goharvest.Date{Time: time.Now()},
+  })
+  if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem creating time entry timer: %s\n", err.Error())
+  }
+  fmt.Printf("%+v\n", te)
+
+  te, err = client.RestartTimeEntryTimer(te.ID)
+  if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem restarting time entry timer: %s\n", err.Error())
+  }
+  fmt.Printf("%+v\n", te)
 
 	fmt.Println("COMPANY")
 	company, err := client.GetCompany()

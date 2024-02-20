@@ -394,3 +394,19 @@ func (c *Client) DeleteTimeEntry(id uint64) error {
   return c.Delete(urlTail)
   
 }
+
+// Restarting a time entry is only possible if it isn’t currently running.
+// Returns a 200 OK response code if the call succeeded.
+func (c *Client) RestartTimeEntryTimer(id uint64) (TimeEntry, error) {
+  te := TimeEntry{}
+  urlTail := fmt.Sprintf("/v2/time_entries/%d/restart", id)
+  res, err := c.Patch(urlTail, nil)
+  if err != nil {
+    return te, err
+  }
+  err = json.NewDecoder(res.Body).Decode(&te)
+  if err != nil {
+    return te, err
+  }
+  return te, nil
+}
