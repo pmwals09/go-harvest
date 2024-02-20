@@ -67,7 +67,7 @@ Yes, you really do, according to [Harvest's documentation](https://help.getharve
 Documentation: [Authentication](https://help.getharvest.com/api-v2/authentication-api/authentication/authentication/)
 
 - [x] Personal Access Token
-- [ ] OAuth2
+- [ ] ~OAuth2~
   - Possibly in the future. For the moment the client simply accepts and uses a token, and would rely on the application to manage the OAuth flow.
 
 ### Clients API
@@ -179,7 +179,7 @@ Documentation: [Time Entries](https://help.getharvest.com/api-v2/timesheets-api/
 - [x] GET /v2/time_entries
 - [x] GET /v2/time_entries/{TIME_ENTRY_ID}
 - [x] POST /v2/time_entries
-- [ ] PATCH /v2/time_entries/{TIME_ENTRY_ID}
+- [x] PATCH /v2/time_entries/{TIME_ENTRY_ID}
 - [ ] DELETE /v2/time_entries/{TIME_ENTRY_ID}/external_reference
 - [ ] DELETE /v2/time_entries/{TIME_ENTRY_ID}
 - [ ] PATCH /v2/time_entries/{TIME_ENTRY_ID}/restart

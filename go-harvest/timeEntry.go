@@ -1,11 +1,9 @@
 package goharvest
 
 import (
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"time"
 )
 
@@ -317,13 +315,63 @@ func (c *Client) CreateTimeEntry(body CreateTimeEntryBody) (TimeEntry, error) {
 	te := TimeEntry{}
 	if body.IsValid() {
 		urlTail := "/v2/time_entries"
-		fmt.Printf("%+v\n", body)
 		res, err := c.Post(urlTail, body)
-		ba, _ := io.ReadAll(res.Body)
-		newResBa := bytes.NewBuffer(ba)
-		newBody := io.NopCloser(newResBa)
-		res.Body = newBody
-		fmt.Println(string(ba))
+		if err != nil {
+			return te, err
+		}
+		err = json.NewDecoder(res.Body).Decode(&te)
+		if err != nil {
+			return te, err
+		}
+		return te, nil
+	} else {
+		return te, errors.New("Invalid body")
+	}
+}
+
+type UpdateTimeEntryBody struct {
+	// The ID of the project to associate with the time entry.
+	ProjectID *int `json:"project_id,omitempty" url:"project_id,omitempty"`
+
+	// The ID of the task to associate with the time entry.
+	TaskID *int `json:"task_id,omitempty" url:"task_id,omitempty"`
+
+	// The ISO 8601 formatted date the time entry was spent.
+	SpentDate *Date `json:"spent_date,omitempty" url:"spent_date,omitempty"`
+
+	// The time the entry started. Defaults to the current time. Example:
+	// “8:00am”.
+	StartedTime *KitchenTime `json:"started_time,omitempty" url:"started_time,omitempty"`
+
+	// The time the entry ended.
+	EndedTime *KitchenTime `json:"ended_time,omitempty" url:"ended_time,omitempty"`
+
+	// The current amount of time tracked.
+	Hours *float64 `json:"hours,omitempty" url:"hours,omitempty"`
+
+	// Any notes to be associated with the time entry.
+	Notes *string `json:"notes,omitempty" url:"notes,omitempty"`
+
+	// An object containing the id, group_id, account_id, and permalink of the
+	// external reference.
+	ExternalReference *ExternalReference `json:"external_reference,omitempty" url:"external_reference,omitempty"`
+}
+
+func (b UpdateTimeEntryBody) GetTimeEntryBodyParams() string {
+	return fmt.Sprintf("%+v", b)
+}
+func (b UpdateTimeEntryBody) IsValid() bool {
+	return true
+}
+
+// Updates the specific time entry by setting the values of the parameters
+// passed. Any parameters not provided will be left unchanged. Returns a
+// time entry object and a 200 OK response code if the call succeeded.
+func (c *Client) UpdateTimeEntry(timeEntryId uint64, body UpdateTimeEntryBody) (TimeEntry, error) {
+	te := TimeEntry{}
+	if body.IsValid() {
+		urlTail := fmt.Sprintf("/v2/time_entries/%d", timeEntryId)
+		res, err := c.Patch(urlTail, body)
 		if err != nil {
 			return te, err
 		}

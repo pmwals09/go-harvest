@@ -78,6 +78,15 @@ func main() {
 	}
 	fmt.Printf("%+v\n\n", timeEntryPost)
 
+	duration = 8.0
+  updatedTimeEntry, err := client.UpdateTimeEntry(timeEntryPost.ID, goharvest.UpdateTimeEntryBody{
+		Hours: &duration,
+	})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem updating time entry: %s\n", err.Error())
+	}
+	fmt.Printf("%+v\n\n", updatedTimeEntry)
+
 	fmt.Println("COMPANY")
 	company, err := client.GetCompany()
 	if err != nil {
