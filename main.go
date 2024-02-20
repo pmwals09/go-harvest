@@ -87,6 +87,12 @@ func main() {
 	}
 	fmt.Printf("%+v\n\n", updatedTimeEntry)
 
+  err = client.DeleteTimeEntry(updatedTimeEntry.ID)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Problem deleting time entry: %s\n", err.Error())
+	}
+
+
 	fmt.Println("COMPANY")
 	company, err := client.GetCompany()
 	if err != nil {

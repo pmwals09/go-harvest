@@ -384,3 +384,13 @@ func (c *Client) UpdateTimeEntry(timeEntryId uint64, body UpdateTimeEntryBody) (
 		return te, errors.New("Invalid body")
 	}
 }
+
+// Delete a time entry. Deleting a time entry is only possible if it’s not
+// closed and the associated project and task haven’t been archived.
+// However, Admins can delete closed entries. Returns a 200 OK response
+// code if the call succeeded.
+func (c *Client) DeleteTimeEntry(id uint64) error {
+  urlTail := fmt.Sprintf("/v2/time_entries/%d", id)
+  return c.Delete(urlTail)
+  
+}

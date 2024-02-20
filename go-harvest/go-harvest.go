@@ -59,6 +59,11 @@ func (c *Client) Patch(urlTail string, body any) (*http.Response, error) {
 	return c.makeRequest("PATCH", urlTail, body)
 }
 
+func (c *Client) Delete(urlTail string) error {
+  _, err :=  c.makeRequest("DELETE", urlTail, nil)
+  return err
+}
+
 // Creates a new request with the provided method, urlTail, and body,
 // setting the appropriate headers each time.
 func (c *Client) newRequest(method string, urlTail string, body any) (*http.Request, error) {
