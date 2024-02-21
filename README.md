@@ -183,7 +183,7 @@ Documentation: [Time Entries](https://help.getharvest.com/api-v2/timesheets-api/
 - [ ] DELETE /v2/time_entries/{TIME_ENTRY_ID}/external_reference
 - [x] DELETE /v2/time_entries/{TIME_ENTRY_ID}
 - [x] PATCH /v2/time_entries/{TIME_ENTRY_ID}/restart
-- [ ] PATCH /v2/time_entries/{TIME_ENTRY_ID}/stop
+- [x] PATCH /v2/time_entries/{TIME_ENTRY_ID}/stop
 
 ### Projects API
 

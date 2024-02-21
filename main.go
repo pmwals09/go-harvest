@@ -103,11 +103,19 @@ func main() {
   }
   fmt.Printf("%+v\n", te)
 
-  te, err = client.RestartTimeEntryTimer(te.ID)
+  // te, err = client.RestartTimeEntryTimer(te.ID)
+  // if err != nil {
+		// fmt.Fprintf(os.Stderr, "Problem restarting time entry timer: %s\n", err.Error())
+  // }
+  // fmt.Printf("%+v\n", te)
+
+  time.Sleep(30 * time.Second)
+  te, err = client.StopTimeEntryTimer(te.ID)
   if err != nil {
-		fmt.Fprintf(os.Stderr, "Problem restarting time entry timer: %s\n", err.Error())
+    fmt.Fprintf(os.Stderr, "Problem stopping timer: %s\n", err.Error())
   }
   fmt.Printf("%+v\n", te)
+
 
 	fmt.Println("COMPANY")
 	company, err := client.GetCompany()

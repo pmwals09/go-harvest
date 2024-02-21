@@ -410,3 +410,19 @@ func (c *Client) RestartTimeEntryTimer(id uint64) (TimeEntry, error) {
   }
   return te, nil
 }
+
+// Stopping a time entry is only possible if it’s currently running.
+// Returns a 200 OK response code if the call succeeded.
+func (c *Client) StopTimeEntryTimer(id uint64) (TimeEntry, error) {
+  te := TimeEntry{}
+  urlTail := fmt.Sprintf("/v2/time_entries/%d/stop", id)
+  res, err := c.Patch(urlTail, nil)
+  if err != nil {
+    return te, err
+  }
+  err = json.NewDecoder(res.Body).Decode(&te)
+  if err != nil {
+    return te, err
+  }
+  return te, nil
+}
