@@ -60,8 +60,8 @@ func (c *Client) Patch(urlTail string, body any) (*http.Response, error) {
 }
 
 func (c *Client) Delete(urlTail string) error {
-  _, err :=  c.makeRequest("DELETE", urlTail, nil)
-  return err
+	_, err := c.makeRequest("DELETE", urlTail, nil)
+	return err
 }
 
 // Creates a new request with the provided method, urlTail, and body,
